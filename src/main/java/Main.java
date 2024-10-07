@@ -50,7 +50,7 @@ public class Main {
             // Now we already have the index of e
             // We want to get the substring from 1 - e
             String numString = bencodedString.substring(1, eIndex);
-            return Integer.parseInt(numString);
+            return Long.parseLong(numString);
         }
         else {
             throw new RuntimeException("Only strings are supported at the moment");
