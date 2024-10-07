@@ -77,6 +77,9 @@ public class Main {
                     // We know that the long has i and e between.
                     int numLength = item.toString().length();
                     index += numLength + 2;
+                } else if (item instanceof List) {
+                    int nestedListEnd = findMatchingEnd(bencodedString.substring(index));
+                    index += nestedListEnd + 1;
                 }
             }
 
@@ -90,6 +93,21 @@ public class Main {
         else {
             throw new RuntimeException("Only strings are supported at the moment");
         }
+    }
+
+    static int findMatchingEnd(String bencodedString) {
+        int depth = 0;
+        for (int i = 0; i < bencodedString.length(); i++) {
+            if (bencodedString.charAt(i) == 'l') {
+                depth++;
+            } else if (bencodedString.charAt(i) == 'e') {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        throw new RuntimeException("Unmatched list start");
     }
 
 }
