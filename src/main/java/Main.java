@@ -65,6 +65,7 @@ public class Main {
 
             while (index < bencodedString.length() && bencodedString.charAt(index) != 'e') {
                 Object item = decodeBencode(bencodedString.substring(index));
+                list.add(item);
 
                 if (item instanceof String) {
                     // We know that the form of string is [num]:[string]
