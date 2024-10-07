@@ -29,85 +29,50 @@ public class Main {
 
     }
 
-    static Object decodeBencode(String bencodedString) {
-        if (Character.isDigit(bencodedString.charAt(0))) {
-            int firstColonIndex = 0;
-            for(int i = 0; i < bencodedString.length(); i++) {
-                if(bencodedString.charAt(i) == ':') {
-                    firstColonIndex = i;
-                    break;
-                }
+    static Object[] decodeBencodeHelper(String bencodedString, int startIndex) {
+        if (startIndex >= bencodedString.length()) {
+            throw new RuntimeException("Unexpected end of input");
+        }
+
+        char firstChar = bencodedString.charAt(startIndex);
+
+        if (Character.isDigit(firstChar)) {
+            // String decoding
+            int colonIndex = bencodedString.indexOf(':', startIndex);
+            if (colonIndex == -1) {
+                throw new RuntimeException("Invalid string encoding");
             }
-            int length = Integer.parseInt(bencodedString.substring(0, firstColonIndex));
-            return bencodedString.substring(firstColonIndex+1, firstColonIndex+1+length);
-        } else if (bencodedString.charAt(0) == 'i') {
-            int eIndex = 0;
-
-            for (int i = 1; i < bencodedString.length(); i++) {
-                if (bencodedString.charAt(i) == 'e') {
-                    eIndex = i;
-                    break;
-                }
+            int length = Integer.parseInt(bencodedString.substring(startIndex, colonIndex));
+            String value = bencodedString.substring(colonIndex + 1, colonIndex + 1 + length);
+            return new Object[]{value, colonIndex + 1 + length};
+        } else if (firstChar == 'i') {
+            // Integer decoding
+            int endIndex = bencodedString.indexOf('e', startIndex);
+            if (endIndex == -1) {
+                throw new RuntimeException("Invalid integer encoding");
             }
-
-            // Now we already have the index of e
-            // We want to get the substring from 1 - e
-            String numString = bencodedString.substring(1, eIndex);
-            return Long.parseLong(numString);
-        } else if (bencodedString.charAt(0) == 'l') {
-            // We know that this is a list
-            // First we create a list of object first
-
+            long value = Long.parseLong(bencodedString.substring(startIndex + 1, endIndex));
+            return new Object[]{value, endIndex + 1};
+        } else if (firstChar == 'l') {
+            // List decoding
             List<Object> list = new ArrayList<>();
-
-            // Start at 1 because we want to skip the l
-            int index = 1;
-
+            int index = startIndex + 1;
             while (index < bencodedString.length() && bencodedString.charAt(index) != 'e') {
-                Object item = decodeBencode(bencodedString.substring(index));
-                list.add(item);
-
-                if (item instanceof String) {
-                    // We know that the form of string is [num]:[string]
-                    // so we can skip the index by string.length() + 1 (for the : sign) + num.toString().length()
-                    int stringLength = ((String) item).length();
-                    int lengthLength = String.valueOf(stringLength).length();
-                    index += stringLength + lengthLength + 1;
-                } else if (item instanceof Long) {
-                    // We know that the long has i and e between.
-                    int numLength = item.toString().length();
-                    index += numLength + 2;
-                } else if (item instanceof List) {
-                    int nestedListEnd = findMatchingEnd(bencodedString.substring(index));
-                    index += nestedListEnd + 1;
-                }
+                Object[] result = decodeBencodeHelper(bencodedString, index);
+                list.add(result[0]);
+                index = (int) result[1];
             }
-
             if (index >= bencodedString.length()) {
-                // should stop at e or len - 1
                 throw new RuntimeException("Unterminated list");
             }
-
-            return list;
-        }
-        else {
-            throw new RuntimeException("Only strings are supported at the moment");
+            return new Object[]{list, index + 1};
+        } else {
+            throw new RuntimeException("Unsupported type");
         }
     }
 
-    static int findMatchingEnd(String bencodedString) {
-        int depth = 0;
-        for (int i = 0; i < bencodedString.length(); i++) {
-            if (bencodedString.charAt(i) == 'l') {
-                depth++;
-            } else if (bencodedString.charAt(i) == 'e') {
-                depth--;
-                if (depth == 0) {
-                    return i;
-                }
-            }
-        }
-        throw new RuntimeException("Unmatched list start");
+    static Object decodeBencode(String bencodedString) {
+        return decodeBencodeHelper(bencodedString, 0)[0];
     }
 
 }
