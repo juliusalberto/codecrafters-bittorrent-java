@@ -13,10 +13,11 @@ public class TorrentParser {
                 result.append((char) b);
             } else {
                 // For non-printable characters, use a placeholder or skip
-                result.append("\\x").append(String.format("%02x", b));
+                result.append((char)(b & 0xff));
             }
         }
 
+        System.out.println(result.toString());
         JsonElement decodedElem = BencodeDecoder.decodeBencode(result.toString());
         JsonObject decoded = decodedElem.getAsJsonObject();
         String announce = decoded.get("announce").getAsString();
