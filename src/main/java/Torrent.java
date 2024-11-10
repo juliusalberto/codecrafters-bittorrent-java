@@ -37,6 +37,5 @@ public class Torrent {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-
     }
 }
