@@ -4,15 +4,14 @@ import java.nio.file.Path;
 
 import com.google.gson.Gson;
 import com.dampcake.bencode.Bencode;
-
-
+import com.google.gson.JsonElement;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         String command = args[0];
         if ("decode".equals(command)) {
             String bencodedValue = args[1];
-            Object decoded;
+            JsonElement decoded;
             try {
                 decoded = BencodeDecoder.decodeBencode(bencodedValue);
             } catch(RuntimeException e) {
@@ -23,7 +22,9 @@ public class Main {
         } else if ("info".equals(command)) {
             String fileName = args[1];
             byte[] fileBytes = Files.readAllBytes(Path.of(fileName));
+            String print = TorrentParser.parseTorrent(fileBytes);
 
+            System.out.println(print);
         }
         else {
             System.out.println("Unknown command: " + command);

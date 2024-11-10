@@ -1,6 +1,7 @@
 import java.util.HashMap;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class TorrentParser {
@@ -16,8 +17,8 @@ public class TorrentParser {
             }
         }
 
-        JsonObject decoded = (JsonObject) BencodeDecoder.decodeBencode(result.toString());
-        Gson gson = new Gson();
+        JsonElement decodedElem = BencodeDecoder.decodeBencode(result.toString());
+        JsonObject decoded = decodedElem.getAsJsonObject();
         String announce = decoded.get("announce").getAsString();
         JsonObject info = decoded.getAsJsonObject("info");
 

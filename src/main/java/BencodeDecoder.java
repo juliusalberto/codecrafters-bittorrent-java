@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 class DecodeResult {
     Object value;
@@ -83,7 +84,7 @@ public class BencodeDecoder {
         return new DecodeResult(hashMap, index + 1);
     }
 
-    static Object decodeBencode(String bencodedString) {
-        return gson.toJsonTree(decodeBencodeHelper(bencodedString, 0).value).getAsJsonObject();
+    static JsonElement decodeBencode(String bencodedString) {
+        return gson.toJsonTree(decodeBencodeHelper(bencodedString, 0).value);
     }
 }
