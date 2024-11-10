@@ -21,7 +21,11 @@ public class TorrentParser {
         String announce = decoded.get("announce").getAsString();
         JsonObject info = decoded.getAsJsonObject("info");
 
-        return new Torrent(announce, info.get("length").getAsLong(),BencodeDecoder.findInfoHash(bytes));
+        return new Torrent(announce,
+                info.get("length").getAsLong(),
+                BencodeDecoder.findInfoHash(bytes),
+                BencodeDecoder.findPiecesHash(bytes),
+                info.get("piece length").getAsLong());
     }
 
 

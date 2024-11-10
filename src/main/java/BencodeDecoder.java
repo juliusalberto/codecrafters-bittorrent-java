@@ -1,6 +1,8 @@
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,5 +108,23 @@ public class BencodeDecoder {
         }
 
         return digest.digest(encoder.encode(info));
+    }
+
+    static List<byte[]> findPiecesHash(byte[] bencodedBytes) {
+        Bencode encoder = new Bencode(true);
+        Map<String, Object> decodedString = encoder.decode(bencodedBytes, Type.DICTIONARY);
+        Map<String, Object> info = (Map<String, Object>) decodedString.get("info");
+
+        ByteBuffer byteBuffer = (ByteBuffer) info.get("pieces");  // it's just raw bytes
+        byte[] pieces = new byte[byteBuffer.remaining()];
+        byteBuffer.get(pieces);
+
+        List<byte[]> res = new ArrayList<>();
+        for (int i = 0; i < pieces.length; i += 20) {
+            byte[] piece = Arrays.copyOfRange(pieces, i, i + 20);
+            res.add(piece);
+        }
+
+        return res;
     }
 }
