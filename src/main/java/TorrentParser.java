@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class TorrentParser {
-    public static String parseTorrent(byte[] bytes) {
+    public static Torrent parseTorrent(byte[] bytes) {
         StringBuilder result = new StringBuilder();
 
         for (byte b: bytes) {
@@ -16,18 +16,12 @@ public class TorrentParser {
                 result.append((char)(b & 0xff));
             }
         }
-
-        System.out.println(result.toString());
         JsonElement decodedElem = BencodeDecoder.decodeBencode(result.toString());
         JsonObject decoded = decodedElem.getAsJsonObject();
         String announce = decoded.get("announce").getAsString();
         JsonObject info = decoded.getAsJsonObject("info");
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("Tracker URL: " + announce);
-        sb.append("Length: " + info.get("length").getAsString());
-
-        return sb.toString();
+        return new Torrent(announce, info.get("length").getAsLong(),BencodeDecoder.findInfoHash(bytes));
     }
 
 

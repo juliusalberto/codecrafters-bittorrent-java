@@ -1,8 +1,12 @@
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dampcake.bencode.Bencode;
+import com.dampcake.bencode.Type;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
@@ -86,5 +90,21 @@ public class BencodeDecoder {
 
     static JsonElement decodeBencode(String bencodedString) {
         return gson.toJsonTree(decodeBencodeHelper(bencodedString, 0).value);
+    }
+
+    static byte[] findInfoHash(byte[] bencodedBytes) {
+        Bencode encoder = new Bencode(true);
+        Map<String, Object> decodedString = encoder.decode(bencodedBytes, Type.DICTIONARY);
+        Map<String, Object> info = (Map<String, Object>) decodedString.get("info");
+
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error: " + e);
+            return null;
+        }
+
+        return digest.digest(encoder.encode(info));
     }
 }

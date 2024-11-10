@@ -22,9 +22,9 @@ public class Main {
         } else if ("info".equals(command)) {
             String fileName = args[1];
             byte[] fileBytes = Files.readAllBytes(Path.of(fileName));
-            String print = TorrentParser.parseTorrent(fileBytes);
+            Torrent torrent = TorrentParser.parseTorrent(fileBytes);
 
-            System.out.println(print);
+            System.out.println(torrent.toString());
         }
         else {
             System.out.println("Unknown command: " + command);
