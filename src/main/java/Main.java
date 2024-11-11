@@ -13,6 +13,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class Main {
+    public static String PEER_ID = "julius-clientyJQTofi";
+
     public static void main(String[] args) throws Exception {
         String command = args[0];
         if ("decode".equals(command)) {
@@ -34,14 +36,26 @@ public class Main {
             String fileName = args[1];
 
             Torrent torrent = parseTorrent(fileName);
-            String peerId = UUID.randomUUID().toString().replace("-", "").substring(0,20);
-            TrackerRequest request = new TrackerRequest(torrent.infoHash, peerId, 6881, 0, 0, torrent.length, true);
+            TrackerRequest request = new TrackerRequest(torrent.infoHash, PEER_ID, 6881, 0, 0, torrent.length, true);
 
             Map<String, Object> response = TrackerClient.sendRequest(request, torrent.announce);
             List<PeerInfo> peers = TrackerClient.extractPeers(response);
             for (PeerInfo peer: peers) {
                 System.out.println(peer);
             }
+        } else if ("handshake".equals(command)) {
+            String fileName = args[1];
+            String ip_port = args[2];
+            Torrent torrent = parseTorrent(fileName);
+            PeerInfo peerInfo = new PeerInfo(ip_port);
+
+            byte[] handshake = PeerClient.createHandshake(torrent, PEER_ID);
+            byte[] result = PeerClient.doHandshake(handshake, peerInfo);
+            byte[] peerIdBytes = Arrays.copyOfRange(result, result.length - 20, result.length);
+
+            // print from bytes to hex
+            System.out.println("Peer ID: " + PeerClient.bytesToHex(peerIdBytes));
+
         }
         else {
             System.out.println("Unknown command: " + command);

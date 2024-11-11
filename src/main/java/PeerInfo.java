@@ -12,6 +12,13 @@ public class PeerInfo {
         this.port = String.valueOf(getPort(peerBytes));
     }
 
+    public PeerInfo(String ipPortCombination) {
+        String ip = ipPortCombination.substring(0, ipPortCombination.lastIndexOf(":"));
+        String port = ipPortCombination.substring(ipPortCombination.indexOf(":") + 1, ipPortCombination.length());
+        this.ip = ip;
+        this.port = port;
+    }
+
     public static String getIp(byte[] peerBytes) {
         if (peerBytes.length != 6) {
             throw new IllegalArgumentException("Peer info must exactly be 6 bytes.");
